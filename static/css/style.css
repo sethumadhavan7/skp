@@ -19,7 +19,7 @@ HEADER
 	position: fixed;
 	height: 70px;
 	width: 100%;
-	background-color: #92ccc4;
+	background-color: #adbd20;
 	top: 0;
 	left: 0;
 	z-index: 100;
@@ -191,7 +191,7 @@ html {
     max-width: 100%;
     border-radius: 200px;
     border: 1px solid rgb(78, 194, 214);
-    color: rgb(78, 194, 214);
+    color: rgb(191, 78, 214);
     display: inline-block;
     padding: 8px 30px 8px 25px;
     font-weight: 300;
@@ -231,7 +231,7 @@ html {
 {
     font-size: 15px;
     font-weight: 400;
-    color: #f4f7c5;
+    color: #b04c1d;
     padding-top: 1%;
     padding-bottom: 1%;
 }

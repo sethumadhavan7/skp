@@ -6,7 +6,7 @@ body{
 	align-items: center;
 	min-height: 100vh;
 	font-family: 'Jost', sans-serif;
-	background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+	background: linear-gradient(to bottom, #843384, #b8245c, #13b4c3);
 }
 .main{
 	width: 350px;
@@ -26,7 +26,7 @@ body{
 	height: 100%;
 }
 label{
-	color: #38aa46;
+	color: #8647ed;
 	font-size: 2.3em;
 	justify-content: center;
 	display: flex;
@@ -54,7 +54,7 @@ button{
 	justify-content: center;
 	display: block;
 	color: #fff;
-	background: #38aa46;
+	background: #ab0c73;
 	font-size: 1em;
 	font-weight: bold;
 	margin-top: 20px;
