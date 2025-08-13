@@ -1,88 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical Implementation Of Automated Skin Disease Prediction</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <style>
-        body {
-            background: linear-gradient(to right, #6a11cb, #b033e2,rgb(17, 206, 227)); /* Gradient from purple to blue */
-            padding: 50px;
-            text-align: center;
-            color: #fff; /* White text color for better contrast */
-        }
-        h1 {
-            color: #fff; /* White color for the heading text */
-        }
-        .content {
-            max-width: 500px;
-            margin: auto;
-            background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background for the content */
-            padding: 20px;
-            border-radius: 8px; /* Rounded corners for the content */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for the content */
-        }
-        #webcam {
-            width: 320px;
-            height: 240px;
-            border: 1px solid #ccc;
-            margin-bottom: 20px;
-        }
-        #capture-button {
-            margin-top: 10px;
-        }
-        .upload-btn {
-            background-color: #9d1787;
-            border: none;
-            padding: 10px;
-            color: white;
-            cursor: pointer;
-            width: 100%;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skin Disease Prediction</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <style>
+    /* Background and Font Style Adjustments */
+    body {
+      background: linear-gradient(to bottom right, #fddbb1, #ffd5cd);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #444;
+      font-family: 'Arial', sans-serif;
+      overflow-y: auto;
+      position: relative;
+      padding: 30px;
+      margin: 0;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .box {
+      background: rgba(250, 250, 250, 0.9);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    /* Uniform Capture Section Dimensions */
+    #webcam, #ip-cam-feed {
+      width: 100%;
+      height: 240px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      object-fit: cover;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      margin-top: 10px;
+      background: linear-gradient(45deg, #ff8364, #ff5c57);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      transition: background 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background: #ff5c57;
+    }
+
+    /* Heading and Subheading Style */
+    h2 {
+      font-size: 2em;
+      font-weight: bold;
+      color: #2c3e50;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    h3 {
+      font-size: 1.4em;
+      color: #5e5e5e;
+      margin-bottom: 15px;
+    }
+
+    /* Floating Bubbles */
+    .bubble {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background-color: rgba(255, 255, 255, 0.6); /* Glass transparent effect */
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+      animation: floatBubble 10s infinite ease-in-out;
+      opacity: 0.7;
+    }
+
+    /* Animation for Floating Bubbles */
+    @keyframes floatBubble {
+      0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0.7;
+      }
+      25% {
+        transform: translateY(-100px) translateX(80px);
+        opacity: 0.5;
+      }
+      50% {
+        transform: translateY(60px) translateX(-120px);
+        opacity: 0.6;
+      }
+      75% {
+        transform: translateY(40px) translateX(120px);
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(0) translateX(0);
+        opacity: 0.8;
+      }
+    }
+
+    /* Bubble container for success page effect */
+    #bubble-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="content">
-        <h1>Clinical Implementation Of Automated Skin Disease Prediction</h1>
+  <!-- Floating Bubbles -->
+  <div id="bubble-container"></div>
 
-        <!-- Image Upload Form -->
-        <form action="/success" method="POST" enctype="multipart/form-data">
-            <input type="file" name="file" accept="image/*" class="form-control"/>
-            <button type="submit" class="upload-btn">Upload Image</button>
-        </form>
+  <div class="container">
+    <h2>Clinical Implementation Of Automated Skin Disease Prediction</h2>
 
-        <hr/>
-
-        <!-- Webcam Capture Section -->
-        <h2>Capture Image</h2>
-        <div id="webcam"></div>
-        <button id="capture-button" class="btn btn-primary">Capture & Predict</button>
+    <!-- Upload Image Section -->
+    <div class="box">
+      <h3>Upload Image</h3>
+      <form action="/success" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" class="form-control" />
+        <button type="submit" class="btn btn-primary">Upload Image</button>
+      </form>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.25/webcam.min.js"></script>
-    <script>
-        Webcam.set({
-            width: 320,
-            height: 240,
-            image_format: 'png',
-            png_quality: 100
-        });
-        Webcam.attach('#webcam');
+    <!-- Webcam Capture Section -->
+    <div class="box">
+      <h3>Capture Image from Webcam</h3>
+      <div id="webcam"></div>
+      <button id="capture-button" class="btn btn-primary">Capture & Predict from Webcam</button>
+    </div>
 
-        document.getElementById('capture-button').addEventListener('click', function () {
-            Webcam.snap(function (data_uri) {
-                // Create a hidden form to submit the captured image
-                let form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/success';
-                form.innerHTML = `<input type="hidden" name="image" value="${data_uri}">`;
-                document.body.appendChild(form);
-                form.submit();
-            });
-        });
-    </script>
+    <!-- IP Camera Capture Section -->
+    <div class="box">
+      <h3>Capture Image from IP Camera</h3>
+      <img id="ip-cam-feed" src="http://192.168.155.99:6677/videofeed?username=&password=" crossOrigin="anonymous" alt="IP Camera Feed">
+      <button id="ip-capture-button" class="btn btn-primary">Capture & Predict from IP Camera</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.25/webcam.min.js"></script>
+  <script>
+    Webcam.set({
+      width: 320,
+      height: 240,
+      image_format: 'png',
+      png_quality: 100
+    });
+    Webcam.attach('#webcam');
+
+    document.getElementById('capture-button').addEventListener('click', function () {
+      Webcam.snap(function (data_uri) {
+        let form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/success';
+        form.innerHTML = `<input type="hidden" name="image" value="${data_uri}">`;
+        document.body.appendChild(form);
+        form.submit();
+      });
+    });
+
+    document.getElementById('ip-capture-button').addEventListener('click', function () {
+      let ipCamFeed = document.getElementById('ip-cam-feed');
+      let canvas = document.createElement('canvas');
+      canvas.width = ipCamFeed.width;
+      canvas.height = ipCamFeed.height;
+      let ctx = canvas.getContext('2d');
+      ctx.drawImage(ipCamFeed, 0, 0, canvas.width, canvas.height);
+
+      let data_uri = canvas.toDataURL();
+      let form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/success';
+      form.innerHTML = `<input type="hidden" name="image" value="${data_uri}">`;
+      document.body.appendChild(form);
+      form.submit();
+    });
+
+    // Bubble Creation Logic
+    function createBubble() {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      
+      // Random Size for Bubble
+      const size = Math.random() * 60 + 60;
+      bubble.style.width = `${size}px`;
+      bubble.style.height = `${size}px`;
+
+      // Random Position for Bubble
+      bubble.style.left = `${Math.random() * 100}vw`; // Random position from 0 to 100% width
+      bubble.style.top = `${Math.random() * 100}vh`;  // Random position from 0 to 100% height
+
+      // Random Animation Duration for Bubble
+      const duration = Math.random() * 10 + 10; // 10 to 20 seconds
+      bubble.style.animationDuration = `${duration}s`;
+
+      document.getElementById('bubble-container').appendChild(bubble);
+    }
+
+    // Start the bubble effect every 1 second
+    setInterval(createBubble, 100);
+  </script>
 
 </body>
 </html>

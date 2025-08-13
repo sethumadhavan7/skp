@@ -1,4 +1,4 @@
-import os
+import os 
 import uuid
 import flask
 import urllib
@@ -32,6 +32,45 @@ classes = [
     'Vascular naevus'
 ]
 
+# Detailed suggestions based on predicted classes
+suggestions = {
+    'Actinic Keratoses': [
+        "Consider visiting a dermatologist for evaluation and treatment options.",
+        "Use sunscreen daily to protect your skin from UV exposure.",
+        "Monitor any changes in the spots, such as size or color."
+    ],
+    'Basal Cell Carcinoma': [
+        "Consult with a dermatologist for a thorough examination and potential biopsy.",
+        "Avoid sun exposure and wear protective clothing.",
+        "If diagnosed, discuss treatment options such as Mohs surgery or topical chemotherapy with your doctor."
+    ],
+    'Benign Keratosis': [
+        "These are generally harmless but should be monitored.",
+        "Keep track of any changes in appearance, size, or color.",
+        "Consult with a healthcare professional if you notice any changes."
+    ],
+    'Dermatofibroma': [
+        "These are usually benign; consult a dermatologist for confirmation.",
+        "If it causes discomfort, you can discuss removal options with your doctor.",
+        "Keep the area clean and avoid irritation."
+    ],
+    'Melanoma': [
+        "This is a serious skin cancer; seek immediate medical attention.",
+        "Follow up with a dermatologist for a full body examination.",
+        "Discuss treatment options, which may include surgery, immunotherapy, or targeted therapy."
+    ],
+    'Melanocytic Nevi': [
+        "These are usually benign but should be monitored.",
+        "Schedule regular check-ups with a dermatologist.",
+        "Look for any changes in color, size, or shape."
+    ],
+    'Vascular naevus': [
+        "These are often harmless; consult a healthcare provider if they change in appearance.",
+        "If there are concerns about appearance, discuss removal options with your doctor.",
+        "Regular monitoring is recommended."
+    ]
+}
+
 def preprocess_image(img):
     img = img.resize((224, 224))  # Resize image to match model input
     img = img.convert('RGB')  # Ensure image is in RGB format
@@ -57,10 +96,12 @@ def predict(img_array, model, threshold=0.6):  # Lowered threshold
     
     # Check if the top probability meets the threshold
     if top_probs[0] < threshold:
-        return ["No skin disease detected"], [0]
+        return ["No skin disease detected"], [0], "No suggestions available."
     
     prob_result = [(prob * 100).round(2) for prob in top_probs]
-    return top_classes, prob_result
+    suggestion = suggestions.get(top_classes[0], ["No suggestions available."])
+    
+    return top_classes, prob_result, suggestion
 
 @app.route('/')
 def home():
@@ -91,7 +132,7 @@ def success():
                 img = Image.open(img_path)
                 img_array = preprocess_image(img)
                 
-                class_result, prob_result = predict(img_array, model)
+                class_result, prob_result, suggestion = predict(img_array, model)
 
                 predictions = {
                     "class1": class_result[0],
@@ -101,7 +142,7 @@ def success():
                     "prob2": prob_result[1] if len(prob_result) > 1 else "N/A",
                     "prob3": prob_result[2] if len(prob_result) > 2 else "N/A",
                 }
-                return render_template('success.html', img=file.filename, predictions=predictions)
+                return render_template('success.html', img=file.filename, predictions=predictions, suggestion=suggestion)
             else:
                 error = "Please upload images of jpg, jpeg, and png extension only"
                 return render_template('index.html', error=error)
@@ -115,7 +156,7 @@ def success():
 
             img = Image.open(img_path)
             img_array = preprocess_image(img)
-            class_result, prob_result = predict(img_array, model)
+            class_result, prob_result, suggestion = predict(img_array, model)
 
             predictions = {
                 "class1": class_result[0],
@@ -125,7 +166,7 @@ def success():
                 "prob2": prob_result[1] if len(prob_result) > 1 else "N/A",
                 "prob3": prob_result[2] if len(prob_result) > 2 else "N/A",
             }
-            return render_template('success.html', img=unique_filename, predictions=predictions)
+            return render_template('success.html', img=unique_filename, predictions=predictions, suggestion=suggestion)
         else:
             return render_template('index.html', error='No file or image provided')
     return render_template('index.html')

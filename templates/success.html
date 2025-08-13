@@ -1,38 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediction Result</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <style>
-        body { padding: 50px; text-align: center; background-color: #f5f5f5; }
-        img { max-width: 100%; height: auto; margin-bottom: 20px; }
-        h1 { color: #2c3e50; }
-        p { color: #9d1787; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prediction Result</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <style>
+    body {
+      margin: 0;
+      background: #FFE0BD; /* Light skin tone base color */
+      color: #444;
+      font-family: 'Arial', sans-serif;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .page-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .bubble {
+      position: fixed;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.6));
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes moveTopRight {
+      0% { transform: translate(0, 100vh) rotate(0deg); }
+      25% { transform: translate(50vw, 75vh) rotate(90deg); }
+      50% { transform: translate(100vw, 50vh) rotate(180deg); }
+      75% { transform: translate(50vw, 25vh) rotate(270deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+
+    @keyframes moveBottomLeft {
+      0% { transform: translate(100vw, 0) rotate(0deg); }
+      25% { transform: translate(50vw, 25vh) rotate(90deg); }
+      50% { transform: translate(0, 50vh) rotate(180deg); }
+      75% { transform: translate(50vw, 75vh) rotate(270deg); }
+      100% { transform: translate(100vw, 100vh) rotate(360deg); }
+    }
+
+    @keyframes moveDiagonal {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(100vw, 100vh) rotate(90deg); }
+      50% { transform: translate(0, 100vh) rotate(180deg); }
+      75% { transform: translate(100vw, 0) rotate(270deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+
+    @keyframes moveCircular {
+      0% { transform: translate(50vw, 0) rotate(0deg); }
+      25% { transform: translate(100vw, 50vh) rotate(90deg); }
+      50% { transform: translate(50vw, 100vh) rotate(180deg); }
+      75% { transform: translate(0, 50vh) rotate(270deg); }
+      100% { transform: translate(50vw, 0) rotate(360deg); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    h1, h3 {
+      color: #3a3a3a;
+    }
+
+    .suggestions {
+      text-align: left;
+      margin-top: 20px;
+    }
+
+    #bubble-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
+  <div id="bubble-container"></div>
 
+  <div class="page-wrapper">
     <div class="container">
-        <h1>Prediction Result</h1>
-        <img src="{{ url_for('static', filename='images/' + img) }}" alt="Predicted Image">
+      <h1>Prediction Result</h1>
+      <img src="{{ url_for('static', filename='images/' + img) }}" alt="Predicted Image">
 
-        <div>
-            <h3>Top Predictions:</h3>
-            <p>
-                {{ predictions.class1 if predictions.class1 != "No skin disease detected" else "No skin disease detected. Please upload or capture an image of an actual skin disease." }}<br/>
-                Probability: {{ predictions.prob1 }}%
-            </p>
+      <div>
+        <h3>Top Predictions:</h3>
+        <p>
+          {{ predictions.class1 if predictions.class1 != "No skin disease detected" else "No skin disease detected. Please upload or capture an image of an actual skin disease." }}<br/>
+          Probability: {{ predictions.prob1 }}%
+        </p>
 
-            {% if predictions.class1 != "No skin disease detected" %}
-            <p>{{ predictions.class2 }} - Probability: {{ predictions.prob2 }}%</p>
-            <p>{{ predictions.class3 }} - Probability: {{ predictions.prob3 }}%</p>
-            {% endif %}
-        </div>
+        {% if predictions.class1 != "No skin disease detected" %}
+          <p>{{ predictions.class2 }} - Probability: {{ predictions.prob2 }}%</p>
+          <p>{{ predictions.class3 }} - Probability: {{ predictions.prob3 }}%</p>
+          
+          <h3>Health Suggestions:</h3>
+          <ul class="suggestions">
+            {% for point in suggestion %}
+              <li>{{ point }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
 
-        <a href="/" class="btn btn-primary">Go Back</a>
+      <a href="/" class="btn btn-primary">Go Back</a>
     </div>
+  </div>
 
+  <script>
+    function createBubble() {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      
+      // Increased size range for medium bubbles (60-120 pixels)
+      const size = Math.random() * 60 + 60;
+      bubble.style.width = `${size}px`;
+      bubble.style.height = `${size}px`;
+      
+      // Random starting position
+      const startPosition = Math.floor(Math.random() * 4);
+      const animations = ['moveTopRight', 'moveBottomLeft', 'moveDiagonal', 'moveCircular'];
+      const positions = [
+        { left: '0', top: '100vh' },
+        { left: '100vw', top: '0' },
+        { left: '0', top: '0' },
+        { left: '50vw', top: '0' }
+      ];
+      
+      bubble.style.left = positions[startPosition].left;
+      bubble.style.top = positions[startPosition].top;
+      
+      // Slower animation for better visibility
+      const animationDuration = Math.random() * 20 + 25; // 25-45 seconds
+      bubble.style.animation = `${animations[startPosition]} ${animationDuration}s infinite linear`;
+      
+      // Higher opacity for better visibility
+      bubble.style.opacity = Math.random() * 0.3 + 0.4; // opacity between 0.4 and 0.7
+      
+      document.getElementById('bubble-container').appendChild(bubble);
+      
+      // Remove bubble after three animation cycles
+      setTimeout(() => {
+        bubble.remove();
+      }, animationDuration * 3 * 1000);
+    }
+
+    // Create initial bubbles
+    for (let i = 0; i < 15; i++) {
+      setTimeout(() => {
+        createBubble();
+      }, i * 500); // Stagger the creation of initial bubbles
+    }
+
+    // Create new bubbles periodically
+    setInterval(createBubble, 100);
+  </script>
 </body>
 </html>
