@@ -4,6 +4,7 @@
 
 - [Overview](#overview)
 - [Features](#features)
+- [Screenshots](#screenshots)
 - [Dataset](#dataset)
 - [Model Architecture](#model-architecture)
 - [Usage](#usage)
@@ -21,6 +22,19 @@ This repository contains a deep learning model for automated multiclass dermatol
     -   **IP Camera:** Connect to an IP camera stream for remote monitoring and prediction.
     -   **Image Upload:** Upload a static image for analysis.
 -   **AI-Based Health Suggestions:** After a diagnosis is made, the application provides custom health suggestions and precautions based on the predicted skin condition. These suggestions are sourced from an internal knowledge base (dictionary).
+
+## Screenshots
+
+Here are some screenshots of the application in action.
+
+**Home Page - Upload an image for diagnosis**
+![Home Page](./webimages/home.png)
+
+**Prediction Result Page**
+![Prediction Result](./webimages/prediction.png)
+
+**Real-time Webcam Diagnosis**
+![Webcam Diagnosis](./webimages/webcam.png)
 
 ## Dataset
 
